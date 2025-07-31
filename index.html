@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoHelper - Smart City Management Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Boshida Bootstrap Icons CSS-ni ulashni unutmang -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #869bf4 0%, #4ba268 100%);
+            --secondary-gradient: linear-gradient(135deg, #93fbca 0%, #f5576c 100%);
+            --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --accent-green: #00ff88;
+            --accent-blue: #00d4ff;
+            --accent-purple: #a855f7;
+            --accent-orange: #ff6b35;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-gradient);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: var(--dark-gradient);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: float 20s infinite linear;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            background: var(--accent-green);
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            background: var(--accent-blue);
+            top: 60%;
+            left: 80%;
+            animation-delay: -5s;
+        }
+
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            background: var(--accent-purple);
+            top: 80%;
+            left: 20%;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.3; }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-green);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-container {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            padding: 4rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #55f7df 50%, #00ff88 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.2); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-green);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .card-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Report Form */
+        .report-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .form-select option{
+            background:white;
+            color: darkblue;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--glass-border);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        /* Notifications */
+        .notifications-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent-green);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .notification-item.warning {
+            border-left-color: var(--accent-orange);
+        }
+
+        .notification-item.urgent {
+            border-left-color: #ff4757;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .notification-message {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 2rem;
+        }
+
+        /* Activities Grid */
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .activity-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+        }
+
+        /* Rating System */
+        .rating-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stars {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .star {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #ffd700;
+            transform: scale(1.1);
+        }
+
+        .rating-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            min-width: 60px;
+        }
+
+        /* Three.js Background */
+        #three-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-menu {
+                display: none;
+            }
+            
+            .main-container {
+                padding: 1rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-green);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-blue);
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+  <div class="bg-animation">
+    <div class="floating-shapes">
+      <div class="shape"></div>
+      <div class="shape"></div>
+      <div class="shape"></div>
+    </div>
+  </div>
+
+  <!-- Three.js Background -->
+  <div id="three-bg"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <i class="bi bi-flower1"></i>
+        <span>EcoHelper</span>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="#" class="nav-link">Dashboard</a></li>
+        <li><a href="#" class="nav-link">Reports</a></li>
+        <li><a href="#" class="nav-link">Analytics</a></li>
+        <li><a href="#" class="nav-link">Community</a></li>
+      </ul>
+      <div class="user-profile">
+        <div class="user-avatar">AS</div>
+        <span>Ali Saidov</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <h1 class="hero-title">EcoHelper</h1>
+      <p class="hero-subtitle">Fuqarolar va hukumat o'rtasidagi raqamli ko'prik. Ekologik va kommunal muammolarni tezkor aniqlash va hal etish orqali toza, xavfsiz, yashashga qulay shahar va mahallalarni yaratish.</p>
+    </section>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="stat-number" id="resolved-count">1,247</div>
+        <div class="stat-label">Hal qilingan muammolar</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+        <div class="stat-number" id="pending-count">23</div>
+        <div class="stat-label">Jarayondagi arizalar</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+        <div class="stat-number" id="active-users">8,952</div>
+        <div class="stat-label">Faol foydalanuvchilar</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-graph-up"></i></div>
+        <div class="stat-number" id="efficiency">94.7%</div>
+        <div class="stat-label">Samaradorlik ko'rsatkichi</div>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title"><i class="bi bi-exclamation-triangle-fill"></i> Muammo haqida xabar berish</h3>
+            <p class="card-subtitle">AI yordamida tezkor tahlil va yo'naltirish</p>
+          </div>
+        </div>
+
+        <form class="report-form">
+          <div class="form-group">
+            <label class="form-label"><i class="bi bi-geo-alt-fill"></i> Hudud</label>
+            <select class="form-select" id="district-select">
+              <option value="">Tanlang...</option>
+              <option value="chilonzor">Chilonzor tumani</option>
+              <option value="yunusobod">Yunusobod tumani</option>
+              <option value="sergeli">Sergeli tumani</option>
+              <option value="shayxontoxur">Shayxontoxur tumani</option>
+              <option value="mirzo-ulugbek">Mirzo Ulug'bek tumani</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label"><i class="bi bi-tools"></i> Muammo kategoriyasi</label>
+            <select class="form-select" id="problem-type">
+              <option value="">Tanlang...</option>
+              <option value="waste"><i class="bi bi-trash-fill"></i> Chiqindi boshqaruvi</option>
+              <option value="water"><i class="bi bi-droplet-fill"></i> Suv ta'minoti</option>
+              <option value="electricity"><i class="bi bi-lightning-fill"></i> Elektr energiyasi</option>
+              <option value="gas"><i class="bi bi-fire"></i> Gaz ta'minoti</option>
+              <option value="lighting"><i class="bi bi-lightbulb-fill"></i> Yoritish</option>
+              <option value="air"><i class="bi bi-wind"></i> Havo sifati</option>
+              <option value="noise"><i class="bi bi-volume-up-fill"></i> Shovqin ifloslanishi</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label"><i class="bi bi-pencil-fill"></i> Batafsil tavsif</label>
+            <textarea class="form-textarea" rows="4" id="problem-description" placeholder="Muammo haqida batafsil yozing..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label"><i class="bi bi-camera-fill"></i> Suratlar va videolar</label>
+            <div class="file-upload-area" onclick="document.getElementById('file-input').click()">
+              <div class="upload-icon"><i class="bi bi-cloud-upload-fill"></i></div>
+              <p>Fayllarni bu yerga tashlang yoki tanlash uchun bosing</p>
+              <small>PNG, JPG, MP4 - maksimal 10MB</small>
+              <input type="file" id="file-input" multiple accept="image/*,video/*" style="display: none;">
+            </div>
+          </div>
+
+          <button type="button" class="btn-primary" onclick="submitReport()">
+            Shikoyatni yuborish
+          </button>
+        </form>
+
+        <div class="chart-container">
+          <canvas id="reportChart"></canvas>
+        </div>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title"><i class="bi bi-bell-fill"></i> Real vaqt xabarlari</h3>
+            <p class="card-subtitle">AI monitoring tizimi</p>
+          </div>
+        </div>
+
+        <div class="notifications-container" id="notifications-list">
+          <div class="notification-item">
+            <div class="notification-header">
+              <span class="notification-title"><i class="bi bi-check2-circle"></i> Bajarildi</span>
+              <span class="notification-time">2 min oldin</span>
+            </div>
+            <div class="notification-message">
+              Chilonzor, 15-mavze ko'chasidagi chiqindi konteyneri bo'shatildi
+            </div>
+          </div>
+
+          <div class="notification-item warning">
+            <div class="notification-header">
+              <span class="notification-title"><i class="bi bi-exclamation-circle-fill"></i> Ogohlantirish</span>
+              <span class="notification-time">15 min oldin</span>
+            </div>
+            <div class="notification-message">
+              Yunusobod 4-kvartalda suv bosimi pasaygan
+            </div>
+          </div>
+
+          <div class="notification-item urgent">
+            <div class="notification-header">
+              <span class="notification-title"><i class="bi bi-exclamation-octagon-fill"></i> Shoshilinch</span>
+              <span class="notification-time">1 soat oldin</span>
+            </div>
+            <div class="notification-message">
+              Sergeli tumanida gaz quvuri oqishi aniqlangan
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activities Grid -->
+    <div class="activities-grid">
+      <div class="activity-card">
+        <h3 class="card-title"><i class="bi bi-star-fill"></i> Mahallani baholash</h3>
+        <p class="card-subtitle">Xizmat sifatini baholang</p>
+
+        <div class="rating-container">
+          <span class="rating-label">Tozalik:</span>
+          <div class="stars" data-category="cleanliness">
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+          </div>
+        </div>
+
+        <div class="rating-container">
+          <span class="rating-label">Xizmat:</span>
+          <div class="stars" data-category="service">
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+          </div>
+        </div>
+
+        <div class="rating-container">
+          <span class="rating-label">Xavfsizlik:</span>
+          <div class="stars" data-category="safety">
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+            <i class="bi bi-star"></i>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="submitRating()">Baholashni yuborish</button>
+      </div>
+
+      <div class="activity-card">
+        <h3 class="card-title">Mahalla statistikasi</h3>
+        <p class="card-subtitle">Real vaqt ma'lumotlari</p>
+        <div class="chart-container">
+          <canvas id="statsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script>
+        // Three.js Background Animation
+        let scene, camera, renderer, particles;
+
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('three-bg').appendChild(renderer.domElement);
+
+            // Create particles
+            const geometry = new THREE.BufferGeometry();
+            const particleCount = 200;
+            const positions = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 2000;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const material = new THREE.PointsMaterial({
+                color: 0x00ff88,
+                size: 2,
+                transparent: true,
+                opacity: 0.6
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            camera.position.z = 1000;
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            particles.rotation.x += 0.001;
+            particles.rotation.y += 0.002;
+            
+            renderer.render(scene, camera);
+        }
+
+        function initCharts() {
+  const ctx = document.getElementById('statsChart').getContext('2d');
+  
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Mahalla A', 'Mahalla B', 'Mahalla C', 'Mahalla D'],
+      datasets: [{
+        label: 'Tozalangan joylar soni',
+        data: [23, 35, 18, 42],
+        backgroundColor: [
+          'rgba(54, 162, 235, 0.7)',
+          'rgba(255, 206, 86, 0.7)',
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(153, 102, 255, 0.7)'
+        ],
+        borderColor: [
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Hududlar soni'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Mahalla nomlari'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom'
+        },
+        tooltip: {
+          enabled: true
+        }
+      }
+    }
+  });
+}
+
+        
+        </script>
