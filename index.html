@@ -150,6 +150,29 @@
             50% { transform: scale(1.05); }
         }
 
+        .hamburger {
+    display: none;
+    cursor: pointer;
+  }
+  @media (max-width: 768px) {
+    .hamburger {
+      display: block;
+    }
+    .nav-menu {
+      display: none;
+      flex-direction: column;
+      background: rgba(10,10,20,0.95);
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .nav-menu.show {
+      display: flex;
+    }
+  }
+
         .nav-menu {
             display: flex;
             gap: 2rem;
@@ -537,6 +560,18 @@
             border-color: var(--accent-blue);
         }
 
+        .stars i {
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.stars i:hover {
+  color: #ffc107;
+  transform: scale(1.1);
+}
+
+
         /* Rating System */
         .rating-container {
             display: flex;
@@ -648,6 +683,10 @@
         <div class="user-avatar">AS</div>
         <span>Ali Saidov</span>
       </div>
+
+      <div class="hamburger" onclick="toggleMenu()">
+  <i class="bi bi-list" style="font-size: 2rem; color: white;"></i>
+</div>
     </div>
   </nav>
 
@@ -840,6 +879,11 @@
   </div>
 
     <script>
+
+ function toggleMenu() {
+    document.querySelector('.nav-menu').classList.toggle('show');
+  }
+
         // Three.js Background Animation
         let scene, camera, renderer, particles;
 
@@ -885,60 +929,98 @@
             renderer.render(scene, camera);
         }
 
-        function initCharts() {
-  const ctx = document.getElementById('statsChart').getContext('2d');
-  
-  new Chart(ctx, {
+
+        document.querySelectorAll('.stars').forEach(starGroup => {
+    const stars = starGroup.querySelectorAll('i');
+    stars.forEach((star, index) => {
+      star.addEventListener('click', () => {
+        // Yulduzcha klasslarini yangilash
+        stars.forEach((s, i) => {
+          if (i <= index) {
+            s.classList.remove('bi-star');
+            s.classList.add('bi-star-fill');
+            s.style.color = '#ffc107'; // oltin rang
+          } else {
+            s.classList.remove('bi-star-fill');
+            s.classList.add('bi-star');
+            s.style.color = ''; // default rang
+          }
+        });
+
+        // Saqlash yoki keyinchalik backendga yuborish uchun qiymatni olish
+        const category = starGroup.getAttribute('data-category');
+        const rating = index + 1;
+        console.log(`Kategoriya: ${category}, Reyting: ${rating}`);
+
+        // Istasangiz: localStorage'ga saqlash
+        localStorage.setItem(`rating-${category}`, rating);
+      });
+    });
+  });
+
+  function submitRating() {
+    const ratings = {};
+    document.querySelectorAll('.stars').forEach(group => {
+      const category = group.getAttribute('data-category');
+      const filledStars = group.querySelectorAll('.bi-star-fill').length;
+      ratings[category] = filledStars;
+    });
+
+    console.log("Yuborilgan reytinglar:", ratings);
+    alert("Bahoyingiz uchun rahmat!");
+
+    // TODO: Agar kerak bo‘lsa, bu yerda AJAX/Fetch orqali backendga yuborish mumkin
+  }
+
+
+ function submitReport() {
+    // Yuborish tugmasi bosilganda animatsiyali tasdiq
+    const button = document.querySelector('.btn-primary');
+    button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Yuborildi!';
+    button.style.background = 'linear-gradient(to right, #00ff88, #00d4ff)';
+    setTimeout(() => {
+      button.innerHTML = 'Shikoyatni yuborish';
+      button.style.background = '';
+    }, 3000);
+  }
+
+
+// Chart.js Report Chart
+ const ctx = document.getElementById('statsChart').getContext('2d');
+  const statsChart = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Mahalla A', 'Mahalla B', 'Mahalla C', 'Mahalla D'],
+      labels: ['Chilonzor', 'Yunusobod', 'Sergeli', 'Shayxontohur'],
       datasets: [{
-        label: 'Tozalangan joylar soni',
-        data: [23, 35, 18, 42],
-        backgroundColor: [
-          'rgba(54, 162, 235, 0.7)',
-          'rgba(255, 206, 86, 0.7)',
-          'rgba(75, 192, 192, 0.7)',
-          'rgba(153, 102, 255, 0.7)'
-        ],
-        borderColor: [
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)'
-        ],
-        borderWidth: 1
+        label: 'Hal qilingan muammolar',
+        data: [120, 90, 150, 80],
+        backgroundColor: ['#00ff88', '#00d4ff', '#a855f7', '#ff6b35'],
+        borderRadius: 8
       }]
     },
     options: {
       responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: 'Hududlar soni'
-          }
-        },
-        x: {
-          title: {
-            display: true,
-            text: 'Mahalla nomlari'
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.raw}`
           }
         }
       },
-      plugins: {
-        legend: {
-          display: true,
-          position: 'bottom'
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#fff' },
+          grid: { color: 'rgba(255,255,255,0.1)' }
         },
-        tooltip: {
-          enabled: true
+        x: {
+          ticks: { color: '#fff' },
+          grid: { color: 'rgba(255,255,255,0.05)' }
         }
       }
     }
   });
-}
 
         
         </script>
